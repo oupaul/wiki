@@ -434,7 +434,7 @@ export default {
       this.processContent(newContent)
     }, 600),
     async onCmPaste (cm, ev) {
-      const clipboardData = ev.clipboardData || ev.originalEvent?.clipboardData
+      const clipboardData = ev.clipboardData || (ev.originalEvent && ev.originalEvent.clipboardData)
       if (!clipboardData) return
 
       const imageItems = Array.from(clipboardData.items).filter(item => item.type.startsWith('image/'))

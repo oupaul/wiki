@@ -136,7 +136,7 @@ export default {
     // Handle clipboard image paste — intercept before CKEditor in capture phase
     const extMap = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp' }
     this._pasteHandler = async (ev) => {
-      const items = Array.from(ev.clipboardData?.items || []).filter(i => i.type.startsWith('image/'))
+      const items = Array.from((ev.clipboardData && ev.clipboardData.items) || []).filter(i => i.type.startsWith('image/'))
       if (items.length === 0) return
 
       ev.stopPropagation()
