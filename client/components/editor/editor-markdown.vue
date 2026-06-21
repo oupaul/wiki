@@ -168,6 +168,7 @@
 <script>
 import _ from 'lodash'
 import { get, sync } from 'vuex-pathify'
+import Cookies from 'js-cookie'
 import markdownHelp from './markdown/help.vue'
 import gql from 'graphql-tag'
 import DOMPurify from 'dompurify'
@@ -432,22 +433,52 @@ export default {
     onCmInput: _.debounce(function (newContent) {
       this.processContent(newContent)
     }, 600),
-    onCmPaste (cm, ev) {
-      // const clipItems = (ev.clipboardData || ev.originalEvent.clipboardData).items
-      // for (let clipItem of clipItems) {
-      //   if (_.startsWith(clipItem.type, 'image/')) {
-      //     const file = clipItem.getAsFile()
-      //     const reader = new FileReader()
-      //     reader.onload = evt => {
-      //       this.$store.commit(`loadingStart`, 'editor-paste-image')
-      //       this.insertAfter({
-      //         content: `![${file.name}](${evt.target.result})`,
-      //         newLine: true
-      //       })
-      //     }
-      //     reader.readAsDataURL(file)
-      //   }
-      // }
+    async onCmPaste (cm, ev) {
+      const clipboardData = ev.clipboardData || ev.originalEvent?.clipboardData
+      if (!clipboardData) return
+
+      const imageItems = Array.from(clipboardData.items).filter(item => item.type.startsWith('image/'))
+      if (imageItems.length === 0) return
+
+      ev.preventDefault()
+
+      const extMap = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp' }
+
+      for (const item of imageItems) {
+        const file = item.getAsFile()
+        if (!file) continue
+
+        const ext = extMap[item.type] || 'png'
+        const filename = `pasted-image-${Date.now()}.${ext}`
+
+        this.$store.commit('loadingStart', 'editor-paste-image')
+        try {
+          const formData = new FormData()
+          formData.append('mediaUpload', JSON.stringify({ folderId: 0 }))
+          formData.append('mediaUpload', file, filename)
+
+          const resp = await fetch('/u', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${Cookies.get('jwt')}` },
+            body: formData
+          })
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+
+          this.insertAtCursor({ content: `![${filename}](/${filename})` })
+          this.$store.commit('showNotification', {
+            message: 'Image uploaded and inserted.',
+            style: 'success',
+            icon: 'check'
+          })
+        } catch (err) {
+          this.$store.commit('showNotification', {
+            message: 'Failed to upload pasted image.',
+            style: 'error',
+            icon: 'warning'
+          })
+        }
+        this.$store.commit('loadingStop', 'editor-paste-image')
+      }
     },
     processContent (newContent) {
       linesMap = []

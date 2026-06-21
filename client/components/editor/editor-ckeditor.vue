@@ -17,6 +17,7 @@
 <script>
 import _ from 'lodash'
 import { get, sync } from 'vuex-pathify'
+import Cookies from 'js-cookie'
 import DecoupledEditor from '@requarks/ckeditor5'
 // import DecoupledEditor from '../../../../wiki-ckeditor5/build/ckeditor'
 import EditorConflict from './ckeditor/conflict.vue'
@@ -43,7 +44,8 @@ export default {
       },
       content: '',
       isConflict: false,
-      insertLinkDialog: false
+      insertLinkDialog: false,
+      _pasteHandler: null
     }
   },
   computed: {
@@ -130,9 +132,59 @@ export default {
     this.$root.$on('overwriteEditorContent', () => {
       this.editor.setData(this.$store.get('editor/content'))
     })
+
+    // Handle clipboard image paste — intercept before CKEditor in capture phase
+    const extMap = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp' }
+    this._pasteHandler = async (ev) => {
+      const items = Array.from(ev.clipboardData?.items || []).filter(i => i.type.startsWith('image/'))
+      if (items.length === 0) return
+
+      ev.stopPropagation()
+      ev.preventDefault()
+
+      for (const item of items) {
+        const file = item.getAsFile()
+        if (!file) continue
+
+        const ext = extMap[item.type] || 'png'
+        const filename = `pasted-image-${Date.now()}.${ext}`
+
+        this.$store.commit('loadingStart', 'editor-paste-image')
+        try {
+          const formData = new FormData()
+          formData.append('mediaUpload', JSON.stringify({ folderId: 0 }))
+          formData.append('mediaUpload', file, filename)
+
+          const resp = await fetch('/u', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${Cookies.get('jwt')}` },
+            body: formData
+          })
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+
+          this.editor.execute('imageInsert', { source: `/${filename}` })
+          this.$store.commit('showNotification', {
+            message: 'Image uploaded and inserted.',
+            style: 'success',
+            icon: 'check'
+          })
+        } catch (err) {
+          this.$store.commit('showNotification', {
+            message: 'Failed to upload pasted image.',
+            style: 'error',
+            icon: 'warning'
+          })
+        }
+        this.$store.commit('loadingStop', 'editor-paste-image')
+      }
+    }
+    this.editor.editing.view.getDomRoot().addEventListener('paste', this._pasteHandler, { capture: true })
   },
   beforeDestroy () {
     if (this.editor) {
+      if (this._pasteHandler) {
+        this.editor.editing.view.getDomRoot().removeEventListener('paste', this._pasteHandler, { capture: true })
+      }
       this.editor.destroy()
       this.editor = null
     }
