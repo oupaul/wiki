@@ -1,0 +1,329 @@
+<title>Wiki.js 維運手冊</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans,system-ui,sans-serif);font-size:15px;line-height:1.7;color:var(--color-text-primary,#1a1a1a);padding:2rem 1rem 4rem;max-width:860px;margin:0 auto}
+h1{font-size:22px;font-weight:500;margin-bottom:0.25rem}
+h2{font-size:18px;font-weight:500;margin:2.5rem 0 1rem}
+h3{font-size:15px;font-weight:500;margin:1.25rem 0 0.5rem}
+p{margin-bottom:0.75rem;color:var(--color-text-secondary,#444)}
+.subtitle{font-size:13px;color:var(--color-text-secondary,#666);margin-bottom:2rem}
+.section{border:0.5px solid var(--color-border-tertiary,#e0e0e0);border-radius:12px;padding:1.5rem 1.75rem;margin-bottom:1.5rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1.25rem}
+.section-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.icon-deploy{background:#E6F1FB;color:#185FA5}
+.icon-backup{background:#EAF3DE;color:#3B6D11}
+.icon-restore{background:#FAEEDA;color:#854F0B}
+.icon-update{background:#EEEDFE;color:#3C3489}
+.section-title{font-size:17px;font-weight:500}
+.section-desc{font-size:13px;color:var(--color-text-secondary,#666);margin-top:1px}
+.step{display:flex;gap:12px;margin-bottom:1rem;align-items:flex-start}
+.step-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;margin-top:2px}
+.num-deploy{background:#B5D4F4;color:#042C53}
+.num-backup{background:#C0DD97;color:#173404}
+.num-restore{background:#FAC775;color:#412402}
+.num-update{background:#CECBF6;color:#26215C}
+.step-body{flex:1}
+.step-label{font-size:14px;font-weight:500;color:var(--color-text-primary,#1a1a1a);margin-bottom:4px}
+.step-note{font-size:13px;color:var(--color-text-secondary,#666);margin-bottom:6px}
+pre{background:var(--color-background-secondary,#f6f6f4);border:0.5px solid var(--color-border-tertiary,#e0e0e0);border-radius:8px;padding:0.75rem 1rem;font-family:var(--font-mono,monospace);font-size:13px;overflow-x:auto;margin:4px 0;line-height:1.6;position:relative}
+code{font-family:var(--font-mono,monospace);font-size:13px;background:var(--color-background-secondary,#f6f6f4);padding:1px 5px;border-radius:4px}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--color-background-primary,#fff);border:0.5px solid var(--color-border-secondary,#ccc);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;color:var(--color-text-secondary,#666);font-family:var(--font-sans,system-ui)}
+.copy-btn:hover{background:var(--color-background-secondary,#f6f6f4)}
+.alert{border-radius:8px;padding:0.75rem 1rem;font-size:13px;margin:0.75rem 0;display:flex;gap:8px;align-items:flex-start;border:0.5px solid}
+.alert-info{background:#E6F1FB;border-color:#85B7EB;color:#0C447C}
+.alert-warn{background:#FAEEDA;border-color:#FAC775;color:#633806}
+.alert-success{background:#EAF3DE;border-color:#97C459;color:#27500A}
+.divider{border:none;border-top:0.5px solid var(--color-border-tertiary,#e0e0e0);margin:1.25rem 0}
+.tag-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem}
+.tag{font-size:12px;padding:3px 10px;border-radius:20px;font-weight:500}
+.tag-blue{background:#E6F1FB;color:#185FA5}
+.tag-green{background:#EAF3DE;color:#3B6D11}
+.tag-amber{background:#FAEEDA;color:#854F0B}
+.tag-purple{background:#EEEDFE;color:#534AB7}
+.repo-bar{background:var(--color-background-secondary,#f6f6f4);border:0.5px solid var(--color-border-tertiary,#e0e0e0);border-radius:8px;padding:0.6rem 1rem;font-size:13px;display:flex;align-items:center;gap:8px;margin-bottom:2rem}
+.repo-bar a{color:var(--color-text-info,#185FA5);text-decoration:none}
+.repo-bar a:hover{text-decoration:underline}
+.data-table{width:100%;border-collapse:collapse;font-size:13px;margin:0.5rem 0}
+.data-table th{text-align:left;padding:6px 10px;color:var(--color-text-secondary,#666);font-weight:500;border-bottom:0.5px solid var(--color-border-tertiary,#e0e0e0)}
+.data-table td{padding:6px 10px;border-bottom:0.5px solid var(--color-border-tertiary,#e0e0e0);color:var(--color-text-secondary,#555)}
+.data-table td:first-child{font-weight:500;color:var(--color-text-primary,#1a1a1a)}
+.checklist{list-style:none;padding:0;margin:0.5rem 0}
+.checklist li{font-size:13px;color:var(--color-text-secondary,#555);padding:3px 0;display:flex;gap:8px;align-items:baseline}
+.checklist li::before{content:"→";color:var(--color-text-secondary,#999);flex-shrink:0}
+</style>
+
+<h1>Wiki.js 維運手冊</h1>
+<p class="subtitle">oupaul/wiki · 自訂版（含剪貼簿貼圖功能）· 2026-06</p>
+
+<div class="repo-bar">
+  <i class="ti ti-brand-github" aria-hidden="true"></i>
+  原始碼：<a href="https://github.com/oupaul/wiki" target="_blank">github.com/oupaul/wiki</a>
+  <span style="color:var(--color-text-secondary,#999);margin:0 4px">·</span>
+  <i class="ti ti-server" aria-hidden="true"></i>
+  部署目錄：<code>/opt/wikijs</code>
+  <span style="color:var(--color-text-secondary,#999);margin:0 4px">·</span>
+  <i class="ti ti-database" aria-hidden="true"></i>
+  PostgreSQL 17
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 一、一鍵部署                               -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-deploy"><i class="ti ti-rocket" style="font-size:18px" aria-hidden="true"></i></div>
+    <div>
+      <div class="section-title">一、一鍵部署</div>
+      <div class="section-desc">全新 Ubuntu 22.04 / 24.04，執行一行指令完成所有安裝</div>
+    </div>
+  </div>
+
+  <div class="tag-row">
+    <span class="tag tag-blue">需要 root 權限</span>
+    <span class="tag tag-blue">Ubuntu 22.04 / 24.04</span>
+    <span class="tag tag-blue">首次約 15～20 分鐘</span>
+  </div>
+
+  <div class="step">
+    <div class="step-num num-deploy">1</div>
+    <div class="step-body">
+      <div class="step-label">SSH 進入新主機，執行一鍵部署</div>
+      <div class="step-note">腳本會自動安裝 Docker、Clone 原始碼、Build image、啟動服務</div>
+      <pre>curl -fsSL https://raw.githubusercontent.com/oupaul/wiki/main/deploy.sh | sudo bash<button class="copy-btn" onclick="copy(this)">複製</button></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num num-deploy">2</div>
+    <div class="step-body">
+      <div class="step-label">腳本完成後，記錄輸出資訊</div>
+      <div class="step-note">密碼為隨機產生，請立即保存</div>
+      <pre>Wiki.js 網址   http://YOUR_IP
+資料庫密碼     AbCdEfGhXxXx  ← 請妥善保存
+設定目錄       /opt/wikijs<button class="copy-btn" onclick="copy(this)">複製</button></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num num-deploy">3</div>
+    <div class="step-body">
+      <div class="step-label">等待 30～60 秒後開啟網址，進行初次設定</div>
+      <div class="step-note">查看啟動進度：</div>
+      <pre>docker logs -f wiki<button class="copy-btn" onclick="copy(this)">複製</button></pre>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <h3>部署後的目錄結構</h3>
+  <pre>/opt/wikijs/
+  ├── docker-compose.yml   ← 服務設定（含 DB 密碼）
+  ├── src/                 ← Wiki.js 原始碼
+  └── update.sh            ← 日後更新腳本<button class="copy-btn" onclick="copy(this)">複製</button></pre>
+
+  <div class="alert alert-info">
+    <i class="ti ti-info-circle" style="font-size:15px;flex-shrink:0;margin-top:1px" aria-hidden="true"></i>
+    <span>若要自訂 port（預設 80），可在執行前設定環境變數：<code>export HOST_PORT=8080</code>，再執行 curl 指令。</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 二、資料備份                               -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-backup"><i class="ti ti-database-export" style="font-size:18px" aria-hidden="true"></i></div>
+    <div>
+      <div class="section-title">二、資料備份</div>
+      <div class="section-desc">備份 PostgreSQL 資料庫及所有上傳檔案</div>
+    </div>
+  </div>
+
+  <div class="tag-row">
+    <span class="tag tag-green">在舊主機或來源主機執行</span>
+    <span class="tag tag-green">需要 root 權限</span>
+  </div>
+
+  <h3>備份範圍</h3>
+  <table class="data-table">
+    <tr><th>項目</th><th>內容</th><th>儲存位置</th></tr>
+    <tr><td>PostgreSQL 資料庫</td><td>所有頁面、使用者、權限、設定、留言、標籤</td><td>Docker volume</td></tr>
+    <tr><td>上傳的媒體檔案</td><td>圖片、文件等媒體庫內容</td><td>/wiki/data/content</td></tr>
+  </table>
+
+  <hr class="divider">
+
+  <div class="step">
+    <div class="step-num num-backup">1</div>
+    <div class="step-body">
+      <div class="step-label">在來源主機執行備份腳本</div>
+      <pre>curl -fsSL https://raw.githubusercontent.com/oupaul/wiki/main/migrate-export.sh | sudo bash<button class="copy-btn" onclick="copy(this)">複製</button></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num num-backup">2</div>
+    <div class="step-body">
+      <div class="step-label">備份完成，確認備份檔</div>
+      <pre>ls -lh /tmp/wikijs-backup-*.tar.gz<button class="copy-btn" onclick="copy(this)">複製</button></pre>
+      <div class="step-note">備份檔命名格式：<code>wikijs-backup-YYYYMMDD-HHMMSS.tar.gz</code></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num num-backup">3</div>
+    <div class="step-body">
+      <div class="step-label">將備份檔傳到新主機</div>
+      <div class="step-note">在新主機上執行（將 OLD_IP 替換成來源主機 IP）</div>
+      <pre>scp root@OLD_IP:/tmp/wikijs-backup-*.tar.gz /tmp/<button class="copy-btn" onclick="copy(this)">複製</button></pre>
+    </div>
+  </div>
+
+  <div class="alert alert-success">
+    <i class="ti ti-circle-check" style="font-size:15px;flex-shrink:0;margin-top:1px" aria-hidden="true"></i>
+    <span>建議定期備份（每週或每次重大更新前），將備份檔存至本機或雲端儲存。</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 三、資料還原                               -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-restore"><i class="ti ti-database-import" style="font-size:18px" aria-hidden="true"></i></div>
+    <div>
+      <div class="section-title">三、資料還原</div>
+      <div class="section-desc">將備份還原至已完成一鍵部署的新主機</div>
+    </div>
+  </div>
+
+  <div class="tag-row">
+    <span class="tag tag-amber">在新主機執行</span>
+    <span class="tag tag-amber">需要先完成一鍵部署</span>
+    <span class="tag tag-amber">需要 root 權限</span>
+  </div>
+
+  <div class="alert alert-warn">
+    <i class="ti ti-alert-triangle" style="font-size:15px;flex-shrink:0;margin-top:1px" aria-hidden="true"></i>
+    <span>還原會<strong>清空</strong>新主機現有的資料庫並覆蓋所有上傳檔案。請確認新主機是全新安裝，或資料可以被覆蓋。</span>
+  </div>
+
+  <div class="step">
+    <div class="step-num num-restore">1</div>
+    <div class="step-body">
+      <div class="step-label">確認備份檔已在新主機上</div>
+      <pre>ls /tmp/wikijs-backup-*.tar.gz<button class="copy-btn" onclick="copy(this)">複製</button></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num num-restore">2</div>
+    <div class="step-body">
+      <div class="step-label">下載並執行還原腳本</div>
+      <pre>curl -fsSL https://raw.githubusercontent.com/oupaul/wiki/main/migrate-import.sh -o /tmp/migrate-import.sh
+
+sudo bash /tmp/migrate-import.sh /tmp/wikijs-backup-YYYYMMDD-HHMMSS.tar.gz<button class="copy-btn" onclick="copy(this)">複製</button></pre>
+      <div class="step-note">將 <code>YYYYMMDD-HHMMSS</code> 替換成實際的備份檔名</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num num-restore">3</div>
+    <div class="step-body">
+      <div class="step-label">還原完成後，確認服務正常</div>
+      <pre>docker ps
+docker logs wiki --tail=30<button class="copy-btn" onclick="copy(this)">複製</button></pre>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <h3>還原後必須確認的設定</h3>
+  <ul class="checklist">
+    <li>Administration → General → 網站 URL（若 IP 或 Domain 有變更）</li>
+    <li>Administration → Storage → Git / S3 等外部 storage 連線</li>
+    <li>Administration → Authentication → OAuth / LDAP / SAML 設定</li>
+    <li>Administration → Mail → SMTP 寄信設定</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 四、版本更新                               -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-update"><i class="ti ti-refresh" style="font-size:18px" aria-hidden="true"></i></div>
+    <div>
+      <div class="section-title">四、版本更新</div>
+      <div class="section-desc">拉取最新程式碼並重新 Build image，Wiki.js 服務短暫中斷後自動恢復</div>
+    </div>
+  </div>
+
+  <div class="tag-row">
+    <span class="tag tag-purple">在部署主機執行</span>
+    <span class="tag tag-purple">重新 Build 約 5～15 分鐘</span>
+  </div>
+
+  <div class="step">
+    <div class="step-num num-update">1</div>
+    <div class="step-body">
+      <div class="step-label">執行內建的更新腳本</div>
+      <div class="step-note">自動完成：git pull → dev flag 關閉 → docker build → 重啟 wiki</div>
+      <pre>sudo /opt/wikijs/update.sh<button class="copy-btn" onclick="copy(this)">複製</button></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num num-update">2</div>
+    <div class="step-body">
+      <div class="step-label">確認更新完成</div>
+      <pre>docker ps
+docker logs wiki --tail=20<button class="copy-btn" onclick="copy(this)">複製</button></pre>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <h3>手動更新（等效步驟）</h3>
+  <pre>cd /opt/wikijs/src
+git pull
+
+sed -i 's/"dev": true/"dev": false/' package.json
+docker build -f dev/build/Dockerfile -t wikijs-custom:latest .
+sed -i 's/"dev": false/"dev": true/' package.json
+
+cd /opt/wikijs
+docker compose up -d --no-deps wiki<button class="copy-btn" onclick="copy(this)">複製</button></pre>
+
+  <div class="alert alert-warn">
+    <i class="ti ti-alert-triangle" style="font-size:15px;flex-shrink:0;margin-top:1px" aria-hidden="true"></i>
+    <span>更新前建議先執行備份，以防萬一需要回滾。</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 附錄：常用指令                             -->
+<!-- ═══════════════════════════════════════════ -->
+<h2>附錄：常用管理指令</h2>
+<div class="section" style="padding:1.25rem 1.75rem">
+  <table class="data-table">
+    <tr><th style="width:42%">操作</th><th>指令</th></tr>
+    <tr><td>查看所有容器狀態</td><td><code>docker ps</code></td></tr>
+    <tr><td>查看 Wiki.js 即時 log</td><td><code>docker logs -f wiki</code></td></tr>
+    <tr><td>重啟 Wiki.js</td><td><code>cd /opt/wikijs && docker compose restart wiki</code></td></tr>
+    <tr><td>停止全部服務</td><td><code>cd /opt/wikijs && docker compose down</code></td></tr>
+    <tr><td>啟動全部服務</td><td><code>cd /opt/wikijs && docker compose up -d</code></td></tr>
+    <tr><td>進入資料庫 CLI</td><td><code>docker exec -it db psql -U wikijs -d wiki</code></td></tr>
+    <tr><td>查看磁碟使用量</td><td><code>docker system df</code></td></tr>
+    <tr><td>清除舊的 build 快取</td><td><code>docker builder prune -f</code></td></tr>
+  </table>
+</div>
+
+<script>
+function copy(btn) {
+  const pre = btn.closest('pre')
+  const text = pre.childNodes[0].textContent.trim()
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent
+    btn.textContent = '已複製'
+    setTimeout(() => { btn.textContent = orig }, 1500)
+  })
+}
+</script>
