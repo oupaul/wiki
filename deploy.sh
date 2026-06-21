@@ -72,10 +72,19 @@ fi
 # STEP 3：Build Docker image
 # ─────────────────────────────────────────────────────────────
 log "Build Docker image（首次約需 5～15 分鐘）..."
+
+# package.json 的 "dev": true 會讓 Wiki.js 顯示開發版警告，build 前先關閉
+sed -i 's/"dev": true/"dev": false/' "$SRC_DIR/package.json"
+log "已關閉開發模式旗標（dev: false）"
+
 docker build \
   -f "$SRC_DIR/dev/build/Dockerfile" \
   -t "${IMAGE_NAME}:latest" \
   "$SRC_DIR"
+
+# 還原 package.json，讓 git pull 不產生衝突
+sed -i 's/"dev": false/"dev": true/' "$SRC_DIR/package.json"
+
 ok "Image build 完成：${IMAGE_NAME}:latest"
 
 # ─────────────────────────────────────────────────────────────
@@ -166,8 +175,11 @@ cat > "$INSTALL_DIR/update.sh" << 'UPDATE'
 set -euo pipefail
 echo "拉取最新原始碼..."
 git -C /opt/wikijs/src pull --ff-only
+echo "關閉開發模式旗標..."
+sed -i 's/"dev": true/"dev": false/' /opt/wikijs/src/package.json
 echo "重新 Build image（約 5~15 分鐘）..."
 docker build -f /opt/wikijs/src/dev/build/Dockerfile -t wikijs-custom:latest /opt/wikijs/src
+sed -i 's/"dev": false/"dev": true/' /opt/wikijs/src/package.json
 echo "重啟 Wiki.js..."
 cd /opt/wikijs && docker compose up -d --no-deps wiki
 echo "更新完成！"
